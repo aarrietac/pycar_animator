@@ -247,7 +247,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     renderer.setSize( window.innerWidth, window.innerHeight );
-    render();
 }
 
 function init() {
@@ -291,6 +290,7 @@ function init() {
 
 // define a function to load the vehicle c.g.
 var loadPos = function() {
+
     var loader = new THREE.FileLoader();
 
     loader.load(
