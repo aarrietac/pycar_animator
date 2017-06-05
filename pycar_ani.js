@@ -7,7 +7,7 @@ var container, scene, camera, renderer, FPS;
 var wheel1, wheel2, wheel3, wheel4, chassis;
 
 // result data from ASCII file
-var result;
+// var result;
 
 // global index for time step simulation
 var idx = 0;
@@ -111,7 +111,7 @@ function render() {
 
     if ( scene !== undefined ) {
 
-        FPS = 10;  // set frames/sec
+        FPS = 25;  // set frames/sec
         setTimeout( function() {
             requestAnimationFrame( render );
         }, 1000 / FPS );
@@ -150,142 +150,130 @@ function render() {
 
 }
 
-function threePointLight() {
-
-    scene.add(new THREE.AmbientLight(0x333333));
-
-    var directionalLight = new THREE.DirectionalLight( 0xaaaaaa );
-    directionalLight.position.set( 10, 10, 10 ).normalize();
-    directionalLight.intensity = 1.0;
-    scene.add( directionalLight );
-
-    directionalLight = new THREE.DirectionalLight( 0xaaaaaa );
-    directionalLight.position.set( -10, -10, 10 ).normalize();
-    directionalLight.intensity = 1.0;
-    scene.add( directionalLight );
-
-}
-
-function setupScene( result ) {
-
-    scene = new THREE.Scene();
-    scene.add( result );
-
-    // create grid
-    var gridXY = new THREE.GridHelper( 400, 40 );
-    gridXY.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), 90*Math.PI/180 );
-    scene.add( gridXY );
-
-    // create mu-split area
-    var xc_area = 200;
-    var yc_area = 2.5;
-    var length_area = 100;
-    var width_area = 5;
-    var material = new THREE.MeshBasicMaterial({ color:0x80a0bc, side:THREE.DoubleSide });
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area-width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area+width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area+width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
-    geometry.faces.push(new THREE.Face3(0, 1, 2));
-    geometry.faces.push(new THREE.Face3(0, 2, 3));
-
-    var muSplitMesh = new THREE.Mesh(geometry, material);
-    scene.add( muSplitMesh );
-
-    // world coordinates
-    var world_coords = createAxis();
-    scene.add(world_coords);
-
-    threePointLight();
-
-    render();
-
-}
-
 function createAxis() {
     var axis = new THREE.AxisHelper(4)
     axis.material.linewidth = 2;
     return axis;
 }
 
-function loadMSGPack() {
-
-    // material
-    var darkMaterial = new THREE.MeshBasicMaterial( {color:0xffffcc} );
-    var wireFrameMaterial = new THREE.MeshBasicMaterial( {color:0x000000, wireframe: true, transparent: true} );
-    var multiMaterial = [ darkMaterial, wireFrameMaterial ];
-
-    // load fullsize chassis mesh
-    var loader = new THREE.JSONLoader();
-    loader.load('./fullsize_car.json', function(geometry, materials) {
-        chassis = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-        chassis.add(createAxis())
-        chassis.rotation.order = 'ZYX';
-        setupScene( chassis );
-    });
-
-    // load wheels mesh
-    loader.load('./tire.json', function(geometry, materials) {
-        wheel1 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-        wheel2 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-        wheel3 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-        wheel4 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-
-        // add to the scene
-        scene.add( wheel1 );
-        scene.add( wheel2 );
-        scene.add( wheel3 );
-        scene.add( wheel4 );
-    });
-}
-
 function onWindowResize() {
 
     camera.aspect = container.offsetWidth / container.offsetHeight;
     camera.updateProjectionMatrix();
-
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
 function init() {
 
-    container = document.getElementById( 'viewport' );
+  // scene
+  scene = new THREE.Scene();
 
-    renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true  } );
-    renderer.setClearColor( 0x000000, 0 );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    container.appendChild( renderer.domElement );
+  // create grid
+  var gridXY = new THREE.GridHelper( 400, 40 );
+  gridXY.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), 90*Math.PI/180 );
+  scene.add( gridXY );
 
-    var valueDiv = document.createElement( 'div' );
-    valueDiv.style.position = 'absolute';
-    valueDiv.style.top = '20px';
-    valueDiv.style.left = '50px';
-    valueDiv.style.width = '500px';
-    valueDiv.style.height = '300px';
-    valueDiv.style.fontSize = '60px';
-    container.appendChild( valueDiv );
-    valueNode = document.createTextNode( '' );
-    valueDiv.appendChild( valueNode );
+  // create mu-split area
+  var xc_area = 200;
+  var yc_area = 2.5;
+  var length_area = 100;
+  var width_area = 5;
+  var material = new THREE.MeshBasicMaterial({ color:0x80a0bc, side:THREE.DoubleSide });
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
+  geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area-width_area/2, 0 ));
+  geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area+width_area/2, 0 ));
+  geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area+width_area/2, 0 ));
+  geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
+  geometry.faces.push(new THREE.Face3(0, 1, 2));
+  geometry.faces.push(new THREE.Face3(0, 2, 3));
 
-    var aspect = container.offsetWidth / container.offsetHeight;
-    camera = new THREE.PerspectiveCamera( 60, aspect, 0.01, 200 );
-    // orbit = new THREE.OrbitControls( camera, container );
-    // orbit.addEventListener( 'change', render );
-    camera.position.set( -10, -10, 10 );
-    // camera.position.set( 0, 0, 30 );
-    camera.up.set( 0, 0, 1 );
+  var muSplitMesh = new THREE.Mesh(geometry, material);
+  scene.add( muSplitMesh );
 
-    var target = new THREE.Vector3( 0, 0, 0 );
-    camera.lookAt( target );
-    // orbit.target = target;
-    camera.updateProjectionMatrix();
+  // world coordinates
+  var world_coords = createAxis();
+  scene.add(world_coords);
 
-    window.addEventListener( 'resize', onWindowResize, false );
+  // lights
+  scene.add(new THREE.AmbientLight(0x333333));
 
-    loadMSGPack();
+  var directionalLight = new THREE.DirectionalLight( 0xaaaaaa );
+  directionalLight.position.set( 10, 10, 10 ).normalize();
+  directionalLight.intensity = 1.0;
+  scene.add( directionalLight );
+
+  directionalLight = new THREE.DirectionalLight( 0xaaaaaa );
+  directionalLight.position.set( -10, -10, 10 ).normalize();
+  directionalLight.intensity = 1.0;
+  scene.add( directionalLight );
+
+  // others
+  container = document.getElementById( 'viewport' );
+
+  renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true  } );
+  renderer.setClearColor( 0x000000, 0 );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  container.appendChild( renderer.domElement );
+
+  var valueDiv = document.createElement( 'div' );
+  valueDiv.style.position = 'absolute';
+  valueDiv.style.top = '20px';
+  valueDiv.style.left = '50px';
+  valueDiv.style.width = '500px';
+  valueDiv.style.height = '300px';
+  valueDiv.style.fontSize = '60px';
+  container.appendChild( valueDiv );
+  valueNode = document.createTextNode( '' );
+  valueDiv.appendChild( valueNode );
+
+  var aspect = container.offsetWidth / container.offsetHeight;
+  camera = new THREE.PerspectiveCamera( 60, aspect, 0.01, 200 );
+  // orbit = new THREE.OrbitControls( camera, container );
+  // orbit.addEventListener( 'change', render );
+  camera.position.set( -10, -10, 10 );
+  // camera.position.set( 0, 0, 30 );
+  camera.up.set( 0, 0, 1 );
+
+  var target = new THREE.Vector3( 0, 0, 0 );
+  camera.lookAt( target );
+  // orbit.target = target;
+  camera.updateProjectionMatrix();
+
+  window.addEventListener( 'resize', onWindowResize, false );
+
+  // load 3D models
+
+  // materials
+  var darkMaterial = new THREE.MeshBasicMaterial( {color:0xffffcc} );
+  var wireFrameMaterial = new THREE.MeshBasicMaterial( {color:0x000000, wireframe: true, transparent: true} );
+  var multiMaterial = [ darkMaterial, wireFrameMaterial ];
+
+  // load fullsize chassis mesh
+  var loader = new THREE.JSONLoader();
+  loader.load('./fullsize_car.json', function(geometry, materials) {
+      chassis = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      chassis.add(createAxis())
+      chassis.rotation.order = 'ZYX';
+      scene.add( chassis );
+  });
+
+  // load wheels mesh
+  loader.load('./tire.json', function(geometry, materials) {
+      wheel1 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      wheel2 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      wheel3 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      wheel4 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+
+      // add to the scene
+      scene.add( wheel1 );
+      scene.add( wheel2 );
+      scene.add( wheel3 );
+      scene.add( wheel4 );
+  });
+
+  render();
 }
 
 // define a function to load the vehicle c.g.
@@ -300,8 +288,8 @@ var loadPos = function() {
 
         // Function when resource is loaded
         function ( data ) {
-                // output the text to the console
-                result = data.split('\n').map(function(line, index) {
+            // output the text to the console
+            result = data.split('\n').map(function(line, index) {
 
                 // array data from ASCII file
                 var array_loc = line.split(' ');
@@ -321,7 +309,7 @@ var loadPos = function() {
 
                 var shift_idx = 12;
                 var nbodies = 5;
-                for (i=0; i < nbodies; i++){
+                for (var i=0; i < nbodies; i++){
                     // body 'i': translation vector
                     motion[1+i*shift_idx] = parseFloat(array_loc[1+i*shift_idx]);
                     motion[2+i*shift_idx] = parseFloat(array_loc[2+i*shift_idx]);
@@ -342,15 +330,12 @@ var loadPos = function() {
                     motion[11+i*shift_idx] = parseFloat(array_loc[9+i*shift_idx]);
                     motion[12+i*shift_idx] = parseFloat(array_loc[12+i*shift_idx]);
                 }
-                return motion;
-                });
-
-            // get offset in 'x' to visualize the vehicle from the origin
-            offset_x = result[0][49];
-
-            init();
-
+            return motion;
         });
+        // get offset in 'x' to visualize the vehicle from the origin
+        offset_x = result[0][49];
+        init();
+    });
 }
 
 loadPos();
