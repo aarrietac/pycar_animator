@@ -273,69 +273,71 @@ function init() {
       scene.add( wheel4 );
   });
 
-  render();
+  // render();
 }
 
 // define a function to load the vehicle c.g.
 var loadPos = function() {
 
-    var loader = new THREE.FileLoader();
+    var manager = new THREE.LoadingManager();
 
-    loader.load(
-        // resource URL
-        'bodies_motion_mu_split.txt',
-        // 'bodies_motion_step.txt',
+    manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+    	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    };
 
-        // Function when resource is loaded
-        function ( data ) {
-            // output the text to the console
-            result = data.split('\n').map(function(line, index) {
+    var loader = new THREE.FileLoader(manager);
 
-                // array data from ASCII file
-                var array_loc = line.split(' ');
-
-                // array of motion data (float)
-                var motion = new Float32Array(61);
-
-                // simulation time [sec]
-                motion[0] = parseFloat(array_loc[0]);
-
-                // Loop through bodies to get motion data from ASCII file
-                // body 1: front left wheel
-                // body 2: front right wheel
-                // body 3: rear left wheel
-                // body 4: rear right wheel
-                // body 5: chassis
-
-                var shift_idx = 12;
-                var nbodies = 5;
-                for (var i=0; i < nbodies; i++){
-                    // body 'i': translation vector
-                    motion[1+i*shift_idx] = parseFloat(array_loc[1+i*shift_idx]);
-                    motion[2+i*shift_idx] = parseFloat(array_loc[2+i*shift_idx]);
-                    motion[3+i*shift_idx] = parseFloat(array_loc[3+i*shift_idx]);
-
-                    // body 'i': matrix of rotation - 'x' axis vector
-                    motion[4+i*shift_idx] = parseFloat(array_loc[4+i*shift_idx]);
-                    motion[5+i*shift_idx] = parseFloat(array_loc[7+i*shift_idx]);
-                    motion[6+i*shift_idx] = parseFloat(array_loc[10+i*shift_idx]);
-
-                    // body 'i': matrix of rotation - 'y' axis vector
-                    motion[7+i*shift_idx] = parseFloat(array_loc[5+i*shift_idx]);
-                    motion[8+i*shift_idx] = parseFloat(array_loc[8+i*shift_idx]);
-                    motion[9+i*shift_idx] = parseFloat(array_loc[11+i*shift_idx]);
-
-                    // body 'i': matrix of rotation - 'z' axis vector
-                    motion[10+i*shift_idx] = parseFloat(array_loc[6+i*shift_idx]);
-                    motion[11+i*shift_idx] = parseFloat(array_loc[9+i*shift_idx]);
-                    motion[12+i*shift_idx] = parseFloat(array_loc[12+i*shift_idx]);
-                }
-            return motion;
-        });
-        // get offset in 'x' to visualize the vehicle from the origin
-        offset_x = result[0][49];
-        init();
+    loader.load( 'bodies_motion_mu_split.txt', function ( data ) {
+            result = data.split('\n').map( readLine );
+            offset_x = result[0][49];
+            init();
+            render();
     });
 }
 
+function readLine(line) {
+    // array data from ASCII file
+    var array_loc = line.split(' ');
+
+    // array of motion data (float)
+    var motion = new Float32Array(61);
+
+    // simulation time [sec]
+    motion[0] = parseFloat(array_loc[0]);
+
+    // Loop through bodies to get motion data from ASCII file
+    // body 1: front left wheel
+    // body 2: front right wheel
+    // body 3: rear left wheel
+    // body 4: rear right wheel
+    // body 5: chassis
+
+    var shift_idx = 12;
+    var nbodies = 5;
+    for (var i=0; i < nbodies; i++){
+        // body 'i': translation vector
+        motion[1+i*shift_idx] = parseFloat(array_loc[1+i*shift_idx]);
+        motion[2+i*shift_idx] = parseFloat(array_loc[2+i*shift_idx]);
+        motion[3+i*shift_idx] = parseFloat(array_loc[3+i*shift_idx]);
+
+        // body 'i': matrix of rotation - 'x' axis vector
+        motion[4+i*shift_idx] = parseFloat(array_loc[4+i*shift_idx]);
+        motion[5+i*shift_idx] = parseFloat(array_loc[7+i*shift_idx]);
+        motion[6+i*shift_idx] = parseFloat(array_loc[10+i*shift_idx]);
+
+        // body 'i': matrix of rotation - 'y' axis vector
+        motion[7+i*shift_idx] = parseFloat(array_loc[5+i*shift_idx]);
+        motion[8+i*shift_idx] = parseFloat(array_loc[8+i*shift_idx]);
+        motion[9+i*shift_idx] = parseFloat(array_loc[11+i*shift_idx]);
+
+        // body 'i': matrix of rotation - 'z' axis vector
+        motion[10+i*shift_idx] = parseFloat(array_loc[6+i*shift_idx]);
+        motion[11+i*shift_idx] = parseFloat(array_loc[9+i*shift_idx]);
+        motion[12+i*shift_idx] = parseFloat(array_loc[12+i*shift_idx]);
+    }
+    return motion;
+}
+
+// init();
 loadPos();
+// render();
