@@ -1,22 +1,17 @@
 <!DOCTYPE html>
-<!--
-Requires msgpack-js.js
-
-https://github.com/creationix/msgpack-js-browser
-(ported from https://github.com/creationix/msgpack-js)
--->
 <html lang='en'>
     <head>
         <title>PyCar Animator</title>
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0'>
         <style>
-            #img-path {
+            /*#img-path {
               display: none;
-            }
+            }*/
             body {
-                margin: 0px;
-                overflow: hidden;
+              font-family: Monospace;
+              margin: 0px;
+              overflow: hidden;
             }
             #viewport {
                 position: absolute;
@@ -38,7 +33,7 @@ https://github.com/creationix/msgpack-js-browser
 
             a { color: orange }
         </style>
-        <input id="img-path" type="file" />
+        <!-- <input id="img-path" type="file" /> -->
         <script src='js/dat.gui.min.js'></script>
         <script src="js/three.js"></script>
         <script src='js/controls/OrbitControls.js'></script>
@@ -46,7 +41,8 @@ https://github.com/creationix/msgpack-js-browser
     </head>
     <body>
         <div id='viewport'></div>
+        <div id="info">PyCar animator<div id="feedback"></div></div>
         <script src="pycar_ani.js"></script>
-        <!-- <script src="load_simulation.js"></script> -->
+        <script src="gui_reset.js"></script>
     </body>
 </html>
