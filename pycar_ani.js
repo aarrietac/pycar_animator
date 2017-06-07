@@ -378,12 +378,13 @@ function animate ( delta ) {
 
 // --------------------------------------------------------------------------//
 // MAIN FUNCTION
-
-var main = function() {
+var main = function( ) {
 
     var loader = new THREE.FileLoader();
 
-    loader.load( 'bodies_motion_mu_split.txt', function ( data ) {
+    var input_ani_file = 'bodies_motion_step.txt';
+
+    loader.load( input_ani_file, function ( data ) {
         result = data.split('\n').map( readLine );
         offset_x = result[0][49];
         init();
@@ -393,4 +394,4 @@ var main = function() {
 
 // run PyCar animator
 console.log( 'PyCar animation starting ...' );
-main();
+main( );
