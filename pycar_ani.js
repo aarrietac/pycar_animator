@@ -28,6 +28,7 @@ var w1p, w2p, w3p, w4p, cp;
 var aw1, aw2, aw3, aw4, ac;
 var time_sim;
 var offset_x = 0;
+var yaw_angle = 0;
 
 // --------------------------------------------------------------------------//
 // TOOLS FUNCTIONS
@@ -136,6 +137,9 @@ function computePosRot( result, offset_x ) {
   ey = new THREE.Vector3( result[idx][55], result[idx][56], result[idx][57] );
   ez = new THREE.Vector3( result[idx][58], result[idx][59], result[idx][60] );
   var A0F = new THREE.Matrix4().makeBasis(ex, ey, ez);
+
+  // get yaw angle of chassis (used for camera orientation)
+  yaw_angle = Math.atan2( ex.y, ex.x);
 
   // var offset_x = result[0][49];
 
@@ -315,6 +319,8 @@ function init() {
 // define render function
 function render() {
 
+    // var chassis = scene.getObjectByName('chassis');
+
     if ( initAnim ) { idx = 0; }
 
     computePosRot( result, offset_x );
@@ -342,7 +348,9 @@ function render() {
         chassis.position.set( cp.x, cp.y, cp.z );
 
         // update camera position
-        camera.position.x = cp.x - 5;
+        camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
+        camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
+        camera.lookAt(chassis.position);
 
         // update time simulation on canvas
         valueNode.nodeValue = 't[s] = ' + time_sim.toFixed(1);
@@ -364,7 +372,7 @@ function animate ( delta ) {
 
     if ( !isPlay ) return;
 
-    if ( idx == 111 ){ idx = 0; }
+    if ( idx == result.length - 1 ){ idx = 0; }
 
     var FPS = 25;  // set frames/sec
     setTimeout( function() {
@@ -382,7 +390,7 @@ var main = function( ) {
 
     var loader = new THREE.FileLoader();
 
-    var input_ani_file = 'bodies_motion_step.txt';
+    var input_ani_file = 'bodies_motion.txt';
 
     loader.load( input_ani_file, function ( data ) {
         result = data.split('\n').map( readLine );
