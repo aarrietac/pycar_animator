@@ -348,8 +348,10 @@ function render() {
         chassis.position.set( cp.x, cp.y, cp.z );
 
         // update camera position
-        camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
-        camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
+        // camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
+        // camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
+        camera.position.x = cp.x - 10.0;
+        camera.position.y = cp.y - 10.0;
         camera.lookAt(chassis.position);
 
         // update time simulation on canvas
