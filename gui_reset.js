@@ -54,5 +54,5 @@ var gui = new dat.GUI();
 
 gui.add(text, 'filename', text.filename);
 gui.add(text, 'load');
-gui.add(text, 'start');
+gui.add(text, 'start').name('start/stop');
 gui.add(text, 'restart');
