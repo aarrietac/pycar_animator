@@ -1,0 +1,132 @@
+<html>
+  <head>
+    <title>My first three.js app</title>
+    <style>
+      body {
+          margin: 0px;
+          overflow: hidden;
+      }
+      #viewport {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          background: #1b1c1e;
+          background-image: linear-gradient(#7d8fa3, #1b1c1e);
+      }
+
+      #info {
+          color: #fff;
+          position: absolute;
+          top: 10px;
+          width: 100%;
+          text-align: center;
+          z-index: 100;
+          display:block;
+      }
+      canvas { width: 100%; height: 100% }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.js"></script>
+    <script src='js/controls/OrbitControls.js'></script>
+    <script>
+
+      var scene, camera, renderer, controls;
+      var geometry, material, mesh;
+
+      var gridXY;
+
+      init();
+      animate();
+
+      function init() {
+        // create scene
+        scene = new THREE.Scene();
+
+        // add lights
+        scene.add( new THREE.AmbientLight( 0x404040 ) );  // soft white light
+
+        // create camera
+        camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+        camera.position.set( -4, -4, 4 );
+        camera.up.set( 0, 0, 1 );
+        camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+        // create and add grid helper to the scene
+        gridXY = new THREE.GridHelper( 100, 10 );
+        gridXY.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), 90*Math.PI/180 );
+        scene.add( gridXY );
+
+        // create and add axis helper
+        var world_coords = createAxis();
+        scene.add(world_coords);
+
+        // create and add cube to the scene
+        // geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        // material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        // cube = new THREE.Mesh( geometry, material );
+        // scene.add( cube );
+
+        // add lower and upper control arm to the scene
+        lowerControlArm();
+        upperControlArm();
+
+        // setup renderer
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor( 0xffffff );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        // add controls
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+      }
+
+      function animate() {
+        requestAnimationFrame( animate );
+
+        // cube.rotation.x += 0.01;
+        // cube.rotation.y += 0.01;
+
+        renderer.render( scene, camera );
+      }
+
+      // Tools
+      function createAxis() {
+          var axis = new THREE.AxisHelper(4)
+          axis.material.linewidth = 2;
+          return axis;
+      }
+
+      // lower control arm vertices
+      function lowerControlArm() {
+        var v1 = new THREE.Vector3( -0.02030*10, +0.37930*10, -0.08940*10 );
+        var v2 = new THREE.Vector3( +0.36700*10, +0.37930*10, -0.08940*10 );
+        var v3 = new THREE.Vector3( -0.00600*10, +0.73900*10, -0.07540*10 );
+
+        var lineGeom = new THREE.Geometry();
+        var vertArray = lineGeom.vertices;
+        vertArray.push( v1, v2, v3, v1 );
+        lineGeom.computeLineDistances();
+        var lineMat = new THREE.LineBasicMaterial( { color: 0xcc0000 } );
+        var line = new THREE.Line( lineGeom, lineMat );
+        scene.add( line );
+      }
+
+      // lower control arm vertices
+      function upperControlArm() {
+        var v1 = new THREE.Vector3( -0.14410*10, +0.47430*10, +0.34480*10 );
+        var v2 = new THREE.Vector3( +0.12240*10, +0.47430*10, +0.38770*10 );
+        var v3 = new THREE.Vector3( -0.07910*10, +0.67070*10, +0.41060*10 );
+
+        var lineGeom = new THREE.Geometry();
+        var vertArray = lineGeom.vertices;
+        vertArray.push( v1, v2, v3, v1 );
+        lineGeom.computeLineDistances();
+        var lineMat = new THREE.LineBasicMaterial( { color: 0xcc0000 } );
+        var line = new THREE.Line( lineGeom, lineMat );
+        scene.add( line );
+      }
+
+    </script>
+  </body>
+</html>
