@@ -20,8 +20,10 @@ var idx = 0;
 var valueNode;
 
 // vehicle global geometric data
-var wheel_base = 2.9;
+// var wheel_base = 2.9;
 var track_with = 1.5;
+var wheel_base;
+var scale_factor = 2.9/2.9;  // reference wheel_base = 2.9m (fullsize)
 var wheel_radius = 0.34;
 
 var w1p, w2p, w3p, w4p, cp;
@@ -285,6 +287,7 @@ function init() {
   var loader = new THREE.JSONLoader();
   loader.load('./fullsize_car.json', function(geometry, materials) {
     chassis = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+    chassis.scale.x = chassis.scale.z = scale_factor;
     chassis.add(createAxis())
     chassis.rotation.order = 'ZYX';
     chassis.position.set( 0, 0, wheel_radius );
@@ -396,7 +399,15 @@ var main = function( ) {
 
     loader.load( input_ani_file, function ( data ) {
         result = data.split('\n').map( readLine );
+
+        // get position offset
         offset_x = result[0][49];
+
+        // compute scale factor for chassis body (fullsize and midsize car)
+        wheel_base = Math.abs(result[0][1] - result[0][25]);
+        scale_factor = wheel_base/2.9;
+
+        // start animation
         init();
         animate();
     });
