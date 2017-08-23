@@ -32,6 +32,9 @@ var time_sim;
 var offset_x = 0;
 var yaw_angle = 0;
 
+var delta_tref, delta_tcurr, kdelta_t;
+delta_tref = 0.05;
+
 // --------------------------------------------------------------------------//
 // TOOLS FUNCTIONS
 
@@ -353,6 +356,7 @@ function render() {
         // update camera position
         // camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
         // camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
+        console.log(cp.x);
         camera.position.x = cp.x - 10.0;
         camera.position.y = cp.y - 10.0;
         camera.lookAt(chassis.position);
@@ -377,7 +381,7 @@ function animate ( delta ) {
 
     if ( !isPlay ) return;
 
-    if ( idx == result.length - 1 ){ idx = 0; }
+    if ( idx >= result.length - 1 ){ idx = 0; }
 
     var FPS = 25;  // set frames/sec
     setTimeout( function() {
@@ -386,7 +390,7 @@ function animate ( delta ) {
 
     render();
 
-    idx += 1;
+    idx += 1*kdelta_t;
 }
 
 // --------------------------------------------------------------------------//
@@ -406,6 +410,10 @@ var main = function( ) {
         // compute scale factor for chassis body (fullsize and midsize car)
         wheel_base = Math.abs(result[0][1] - result[0][25]);
         scale_factor = wheel_base/2.9;
+
+        // compute delta time factor (proper visualization)
+        delta_tcurr = result[1][0] - result[0][0];
+        kdelta_t = (delta_tref/delta_tcurr).toFixed(1);
 
         // start animation
         init();
