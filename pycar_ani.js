@@ -40,22 +40,31 @@ delta_tref = 0.05;
 
 function addMuSplitArea ( offset_x ) {
     // create mu-split area
-    var xc_area = 200;
-    var yc_area = 2.5;
-    var length_area = 100;
-    var width_area = 5;
+    var xc_area = 120 - offset_x;
+    var yc_area = 0.0;
+    var length_area = 300;
+    var width_area = 5.5;
     var material = new THREE.MeshBasicMaterial({ color:0x80a0bc, side:THREE.DoubleSide });
     var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area-width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2-offset_x, yc_area+width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area+width_area/2, 0 ));
-    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2-offset_x, yc_area-width_area/2, 0 ));
+    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2, yc_area-width_area/2, 0 ));
+    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2, yc_area-width_area/2, 0 ));
+    geometry.vertices.push(new THREE.Vector3( xc_area+length_area/2, yc_area+width_area/2, 0 ));
+    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2, yc_area+width_area/2, 0 ));
+    geometry.vertices.push(new THREE.Vector3( xc_area-length_area/2, yc_area-width_area/2, 0 ));
     geometry.faces.push(new THREE.Face3(0, 1, 2));
     geometry.faces.push(new THREE.Face3(0, 2, 3));
 
     var muSplitMesh = new THREE.Mesh(geometry, material);
     scene.add( muSplitMesh );
+}
+
+function addObstacle( offset_x ) {
+  var cube = new THREE.Mesh( new THREE.CubeGeometry( 5, 5, 5 ), new THREE.MeshNormalMaterial() );
+  cube.position.x = 150 - offset_x;
+  cube.position.y = 0;
+  cube.position.z = 5/2;
+
+  scene.add( cube );
 }
 
 function computePosRot( result, offset_x ) {
@@ -277,12 +286,15 @@ function init() {
   // Add road properties and 3D vehicle model
 
   // create grid
-  var gridXY = new THREE.GridHelper( 400, 40, 0xFF4444 );
+  var gridXY = new THREE.GridHelper( 1000, 100, 0xFF4444 );
   gridXY.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), 90*Math.PI/180 );
   scene.add( gridXY );
 
   // add mu split area
   addMuSplitArea ( offset_x );
+
+  // add obstacle
+  addObstacle( offset_x );
 
   // load 3D models
 
