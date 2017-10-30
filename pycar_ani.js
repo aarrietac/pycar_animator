@@ -43,7 +43,7 @@ function onWindowResize() {
 // --------------------------------------------------------------------------//
 // INIT FUNCTION
 
-function init() {
+function init( ) {
 
   // scene
   scene = new THREE.Scene();
@@ -197,7 +197,7 @@ function render() {
         // update camera position
         // camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
         // camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
-        console.log(cp.x);
+        // console.log(cp.x);
         camera.position.x = cp.x - 10.0;
         camera.position.y = cp.y - 10.0;
         camera.lookAt(chassis.position);
@@ -242,11 +242,20 @@ var main = function( ) {
 
     var input_ani_file = 'bodies_motion.txt';
 
-    loader.load( input_ani_file, function ( data ) {
+    var index = 0;
+    var files = ['bodies_motion_step.txt', 'bodies_motion.txt'];
+
+    function loadNextSimulation() {
+      if (index > files.length - 1) return;
+
+      console.log(files[index]);
+
+      loader.load(files[index], function (data) {
         result = data.split('\n').map( readLine );
 
         // get position offset
         offset_x = result[0][49];
+        console.log(offset_x);
 
         // compute scale factor for chassis body (fullsize and midsize car)
         wheel_base = Math.abs(result[0][1] - result[0][25]);
@@ -256,10 +265,36 @@ var main = function( ) {
         delta_tcurr = result[1][0] - result[0][0];
         kdelta_t = (delta_tref/delta_tcurr).toFixed(1);
 
-        // start animation
-        init();
-        animate();
-    });
+        index++;
+        loadNextSimulation();
+      })
+    };
+
+    loadNextSimulation();
+
+    // start animation
+    init();
+    animate();
+
+
+    // loader.load( input_ani_file, function ( data ) {
+    //     result = data.split('\n').map( readLine );
+
+    //     // get position offset
+    //     offset_x = result[0][49];
+
+    //     // compute scale factor for chassis body (fullsize and midsize car)
+    //     wheel_base = Math.abs(result[0][1] - result[0][25]);
+    //     scale_factor = wheel_base/2.9;
+
+    //     // compute delta time factor (proper visualization)
+    //     delta_tcurr = result[1][0] - result[0][0];
+    //     kdelta_t = (delta_tref/delta_tcurr).toFixed(1);
+
+    //     // start animation
+    //     init();
+    //     animate();
+    // });
 }
 
 // run PyCar animator

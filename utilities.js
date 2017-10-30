@@ -6,10 +6,8 @@
 
 function addMuSplitArea ( offset_x ) {
     // create mu-split area
-    var xc_a = 120 - offset_x;
-    var yc_a = 0.0;
-    var l_area = 300;
-    var w_area = 5.5;
+    xc_a = xc_a - offset_x;
+
     var material = new THREE.MeshBasicMaterial({ color:0x80a0bc, side:THREE.DoubleSide });
     var geometry = new THREE.Geometry();
     geometry.vertices.push(new THREE.Vector3( xc_a - l_area/2, yc_a - w_area/2, 0 ));
@@ -30,9 +28,10 @@ function addMuSplitArea ( offset_x ) {
 
 function addObstacle( offset_x ) {
   var cube = new THREE.Mesh( new THREE.CubeGeometry( 5, 5, 5 ), new THREE.MeshNormalMaterial() );
-  cube.position.x = 150 - offset_x;
-  cube.position.y = 0;
-  cube.position.z = 5/2;
+
+  cube.position.x = obs_xc - offset_x;
+  cube.position.y = obs_yc;
+  cube.position.z = obs_z;
 
   scene.add(cube);
 }
