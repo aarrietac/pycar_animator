@@ -1,6 +1,11 @@
+// Simulation parameters
+var delta_tref = 0.05;
+var delta_tcurr = 0.01;
+var offset_x = 62.41;
+
 // Vehicle geometric parameters
 var track_with = 1.5;
-var wheel_base = 3.0;
+var wheel_base = 2.9;
 var wheel_radius = 0.34;
 
 // Road geometric parameters

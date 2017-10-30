@@ -6,9 +6,19 @@ on the animation.
 file = 'animation_global_variables.js'
 f = open(file, 'w')
 
+# simulation parameters
+delta_tref = 0.05
+delta_tcurr = 0.01
+offset_x = 6.241000e+01
+
+f.write('// Simulation parameters\n')
+f.write('var delta_tref = ' + str(delta_tref) + ';\n')
+f.write('var delta_tcurr = ' + str(delta_tcurr) + ';\n')
+f.write('var offset_x = ' + str(offset_x) + ';\n\n')
+
 # vehicle geometric parameters
 track_with = 1.5
-wheel_base = 3.0
+wheel_base = 2.9
 wheel_radius = 0.34
 
 f.write('// Vehicle geometric parameters\n')

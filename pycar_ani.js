@@ -19,19 +19,13 @@ var result;
 var idx = 0;
 var valueNode;
 
-// vehicle global geometric data
-// var wheel_base = 2.9;
-var track_with = 1.5;
-var wheel_base;
+// scale factor for vehicle body
 var scale_factor = 2.9/2.9;  // reference wheel_base = 2.9m (fullsize)
-var wheel_radius = 0.34;
 
 var time_sim;
-var offset_x = 0;
 var yaw_angle = 0;
 
-var delta_tref, delta_tcurr, kdelta_t;
-delta_tref = 0.05;
+var kdelta_t;
 
 function onWindowResize() {
 
@@ -102,10 +96,10 @@ function init( ) {
   scene.add( gridXY );
 
   // add mu split area
-  addMuSplitArea ( offset_x );
+  addMuSplitArea ( );
 
   // add obstacle
-  addObstacle( offset_x );
+  addObstacle( );
 
   // load 3D models
 
@@ -153,7 +147,7 @@ function render() {
     if ( initAnim ) { idx = 0; }
 
     // update position and orientation of each body
-    var data_pos_rot = computePosRot( result, offset_x );
+    var data_pos_rot = computePosRot( result );
 
     // wheels
     var w1p = data_pos_rot.pos_w1;
@@ -240,29 +234,20 @@ var main = function( ) {
 
     var loader = new THREE.FileLoader();
 
-    var input_ani_file = 'bodies_motion.txt';
-
     var index = 0;
-    var files = ['bodies_motion_step.txt', 'bodies_motion.txt'];
+    // var files = ['bodies_motion_step.txt', 'bodies_motion.txt'];
+    var files = ['bodies_motion.txt'];
 
     function loadNextSimulation() {
       if (index > files.length - 1) return;
 
-      console.log(files[index]);
-
       loader.load(files[index], function (data) {
         result = data.split('\n').map( readLine );
 
-        // get position offset
-        offset_x = result[0][49];
-        console.log(offset_x);
-
         // compute scale factor for chassis body (fullsize and midsize car)
-        wheel_base = Math.abs(result[0][1] - result[0][25]);
         scale_factor = wheel_base/2.9;
 
         // compute delta time factor (proper visualization)
-        delta_tcurr = result[1][0] - result[0][0];
         kdelta_t = (delta_tref/delta_tcurr).toFixed(1);
 
         index++;
@@ -270,31 +255,12 @@ var main = function( ) {
       })
     };
 
+    // for comparision purposes, e.g. ABS-ON and ABS-OFF
     loadNextSimulation();
 
     // start animation
     init();
     animate();
-
-
-    // loader.load( input_ani_file, function ( data ) {
-    //     result = data.split('\n').map( readLine );
-
-    //     // get position offset
-    //     offset_x = result[0][49];
-
-    //     // compute scale factor for chassis body (fullsize and midsize car)
-    //     wheel_base = Math.abs(result[0][1] - result[0][25]);
-    //     scale_factor = wheel_base/2.9;
-
-    //     // compute delta time factor (proper visualization)
-    //     delta_tcurr = result[1][0] - result[0][0];
-    //     kdelta_t = (delta_tref/delta_tcurr).toFixed(1);
-
-    //     // start animation
-    //     init();
-    //     animate();
-    // });
 }
 
 // run PyCar animator

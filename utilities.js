@@ -4,7 +4,7 @@
 // Create and add to the scene a road area (can be used for mu-split)
 // ---------------------------------------------------------------------------//
 
-function addMuSplitArea ( offset_x ) {
+function addMuSplitArea ( ) {
     // create mu-split area
     xc_a = xc_a - offset_x;
 
@@ -26,7 +26,7 @@ function addMuSplitArea ( offset_x ) {
 // Create and add to the scene an obstacle (avoiding maneuvers)
 // ---------------------------------------------------------------------------//
 
-function addObstacle( offset_x ) {
+function addObstacle( ) {
   var cube = new THREE.Mesh( new THREE.CubeGeometry( 5, 5, 5 ), new THREE.MeshNormalMaterial() );
 
   cube.position.x = obs_xc - offset_x;
@@ -97,7 +97,7 @@ function readLine(line) {
 // Compute the position and rotation matrix of each body
 // ---------------------------------------------------------------------------//
 
-function computePosRot( result, offset_x ) {
+function computePosRot( result ) {
 
   // local variables
   var ex, ey, ez;
