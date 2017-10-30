@@ -5,15 +5,24 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 // variables from Three js environment
 var container, scene, camera, renderer, FPS;
 
-// define objects from Three js (bodies)
-var wheel1 = new THREE.Object3D();
-var wheel2 = new THREE.Object3D();
-var wheel3 = new THREE.Object3D();
-var wheel4 = new THREE.Object3D();
-var chassis = new THREE.Object3D();
+// Simulation informations
+var index = 0;
+var files = ['bodies_motion.txt'];
+var num_simu = files.length;
+var num_bodies = 5;
+
+// Create dynamically objects 3D for wheels and chassis
+var wheels = [];
+var chassis = [];
+for (var i = 0; i < num_simu; i++){
+  chassis[i] = new THREE.Object3D();
+  for (var j = 0; j < num_bodies - 1; j++){
+    wheels[j + (num_bodies - 1)*i] = new THREE.Object3D();
+  }
+}
 
 // result data from ASCII file
-var result;
+var result = [];
 
 // global index for time step simulation
 var idx = 0;
@@ -26,6 +35,10 @@ var time_sim;
 var yaw_angle = 0;
 
 var kdelta_t;
+
+
+// --------------------------------------------------------------------------//
+// RESIZE WINDOWS FUNCTION
 
 function onWindowResize() {
 
@@ -106,33 +119,45 @@ function init( ) {
   // load fullsize chassis mesh
   var loader = new THREE.JSONLoader();
   loader.load('./fullsize_car.json', function(geometry, materials) {
-    chassis = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-    chassis.scale.x = chassis.scale.z = scale_factor;
-    chassis.add(createAxis())
-    chassis.rotation.order = 'ZYX';
-    chassis.position.set( 0, 0, wheel_radius );
-    scene.add( chassis );
+
+    for (var i = 0; i < chassis.length; i++){
+      chassis[i] = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      chassis[i].scale.x = chassis[i].scale.z = scale_factor;
+      chassis[i].add(createAxis())
+      chassis[i].rotation.order = 'ZYX';
+      chassis[i].position.set( 0, 0, wheel_radius );
+      scene.add( chassis[i] );
+    }
   });
 
   // load wheels mesh
   loader.load('./tire.json', function(geometry, materials) {
+
     // load wheel 3D blender model
-    wheel1 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-    wheel2 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-    wheel3 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
-    wheel4 = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+    for (var i = 0; i < wheels.length; i++){
 
-    // set initial position
-    wheel1.position.set( 0, track_with/2, wheel_radius );
-    wheel2.position.set( 0, -track_with/2, wheel_radius );
-    wheel3.position.set( -wheel_base, track_with/2, wheel_radius );
-    wheel4.position.set( -wheel_base, -track_with/2, wheel_radius );
+      // load model
+      wheels[i] = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
 
-    // add to the scene
-    scene.add( wheel1 );
-    scene.add( wheel2 );
-    scene.add( wheel3 );
-    scene.add( wheel4 );
+      // set design wheels positions
+      switch (i){
+        case 0:  // front left
+          wheels[i].position.set( 0, track_with/2, wheel_radius );
+          break;
+        case 1:  // front right
+          wheels[i].position.set( 0, -track_with/2, wheel_radius );
+          break;
+        case 2:  // rear left
+          wheels[i].position.set( -wheel_base, track_with/2, wheel_radius );
+          break;
+        case 3:  // rear right
+          wheels[i].position.set( -wheel_base, -track_with/2, wheel_radius );
+          break;
+      }
+
+      // add to the scene
+      scene.add(wheels[i]);
+    }
   });
 }
 
@@ -147,20 +172,11 @@ function render() {
     if ( initAnim ) { idx = 0; }
 
     // update position and orientation of each body
-    var data_pos_rot = computePosRot( result );
+    var data_pos_rot = computePosRot( result[0] );
 
     // wheels
-    var w1p = data_pos_rot.pos_w1;
-    var aw1 = data_pos_rot.rot_w1;
-
-    var w2p = data_pos_rot.pos_w2;
-    var aw2 = data_pos_rot.rot_w2;
-
-    var w3p = data_pos_rot.pos_w3;
-    var aw3 = data_pos_rot.rot_w3;
-
-    var w4p = data_pos_rot.pos_w4;
-    var aw4 = data_pos_rot.rot_w4;
+    var wheels_pos = [data_pos_rot.pos_w1, data_pos_rot.pos_w2, data_pos_rot.pos_w3, data_pos_rot.pos_w4];
+    var wheels_rot = [data_pos_rot.rot_w1, data_pos_rot.rot_w2, data_pos_rot.rot_w3, data_pos_rot.rot_w4];
 
     // chassis
     var cp = data_pos_rot.pos_ch;
@@ -168,25 +184,17 @@ function render() {
 
     if ( scene !== undefined ) {
 
-        // update wheel-knuckle 1 position and orientation
-        wheel1.setRotationFromMatrix( aw1 );
-        wheel1.position.set( w1p.x, w1p.y, w1p.z );
-
-        // update wheel-knuckle 2 position and orientation
-        wheel2.setRotationFromMatrix( aw2 );
-        wheel2.position.set( w2p.x, w2p.y, w2p.z );
-
-        // update wheel-knuckle 3 position and orientation
-        wheel3.setRotationFromMatrix( aw3 );
-        wheel3.position.set( w3p.x, w3p.y, w3p.z );
-
-        // update wheel-knuckle 4 position and orientation
-        wheel4.setRotationFromMatrix( aw4 );
-        wheel4.position.set( w4p.x, w4p.y, w4p.z );
+        // update wheel-knuckle(i) position and orientation
+        for (var i = 0; i < wheels.length; i++){
+          wheels[i].setRotationFromMatrix(wheels_rot[i]);
+          wheels[i].position.set(wheels_pos[i].x, wheels_pos[i].y, wheels_pos[i].z);
+        }
 
         // update chassis position and orientation
-        chassis.setRotationFromMatrix( ac );
-        chassis.position.set( cp.x, cp.y, cp.z );
+        for (var i = 0; i < chassis.length; i++){
+          chassis[i].setRotationFromMatrix( ac );
+          chassis[i].position.set( cp.x, cp.y, cp.z );
+        }
 
         // update camera position
         // camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
@@ -194,7 +202,7 @@ function render() {
         // console.log(cp.x);
         camera.position.x = cp.x - 10.0;
         camera.position.y = cp.y - 10.0;
-        camera.lookAt(chassis.position);
+        camera.lookAt(chassis[0].position);
 
         // update time simulation on canvas
         valueNode.nodeValue = 't[s] = ' + time_sim.toFixed(1);
@@ -216,7 +224,7 @@ function animate ( delta ) {
 
     if ( !isPlay ) return;
 
-    if ( idx >= result.length - 1 ){ idx = 0; }
+    if ( idx >= result[0].length - 1 ){ idx = 0; }
 
     var FPS = 25;  // set frames/sec
     setTimeout( function() {
@@ -230,19 +238,16 @@ function animate ( delta ) {
 
 // --------------------------------------------------------------------------//
 // MAIN FUNCTION
+
 var main = function( ) {
 
     var loader = new THREE.FileLoader();
-
-    var index = 0;
-    // var files = ['bodies_motion_step.txt', 'bodies_motion.txt'];
-    var files = ['bodies_motion.txt'];
 
     function loadNextSimulation() {
       if (index > files.length - 1) return;
 
       loader.load(files[index], function (data) {
-        result = data.split('\n').map( readLine );
+        result[index] = data.split('\n').map( readLine );
 
         // compute scale factor for chassis body (fullsize and midsize car)
         scale_factor = wheel_base/2.9;
