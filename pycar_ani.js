@@ -6,20 +6,28 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container, scene, camera, renderer, FPS;
 
 // Simulation informations
-var index = 0;
-var files = ['bodies_motion.txt'];
+var files = ['bodies_motion.txt', 'bodies_motion1.txt'];
+// var files = ['bodies_motion.txt'];
 var num_simu = files.length;
-var num_bodies = 5;
 
 // Create dynamically objects 3D for wheels and chassis
-var wheels = [];
+
 var chassis = [];
-for (var i = 0; i < num_simu; i++){
+var num_chassis_per_car = 1;
+
+for (var i = 0; i < num_simu*num_chassis_per_car; i++){
   chassis[i] = new THREE.Object3D();
-  for (var j = 0; j < num_bodies - 1; j++){
-    wheels[j + (num_bodies - 1)*i] = new THREE.Object3D();
-  }
 }
+
+var wheels = [];
+var num_wheels_per_car = 4;
+
+for (var i = 0; i < num_simu*num_wheels_per_car; i++){
+  wheels[i] = new THREE.Object3D();
+}
+
+console.log(wheels);
+console.log(chassis);
 
 // result data from ASCII file
 var result = [];
@@ -120,12 +128,14 @@ function init( ) {
   var loader = new THREE.JSONLoader();
   loader.load('./fullsize_car.json', function(geometry, materials) {
 
-    for (var i = 0; i < chassis.length; i++){
+    num_chassis = chassis.length;
+    for (var i = 0; i < num_chassis; i++){
+      chassis[i] = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial( { color: 0xff8010, wireframe: true } ));
       chassis[i] = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
       chassis[i].scale.x = chassis[i].scale.z = scale_factor;
-      chassis[i].add(createAxis())
+      chassis[i].add(createAxis());
       chassis[i].rotation.order = 'ZYX';
-      chassis[i].position.set( 0, 0, wheel_radius );
+
       scene.add( chassis[i] );
     }
   });
@@ -181,9 +191,9 @@ function render() {
 
     num_wheels = wheels.length;
     for (var i = 0; i < num_simu; i++){
-      for (var j = 0; j < num_wheels; j++){
-        wheels_pos[j + num_wheels*i] = data_pos_rot[i].pos_whl[j];
-        wheels_rot[j + num_wheels*i] = data_pos_rot[i].rot_whl[j];
+      for (var j = 0; j < num_wheels_per_car; j++){
+        wheels_pos[j + num_wheels_per_car*i] = data_pos_rot[i].pos_whl[j];
+        wheels_rot[j + num_wheels_per_car*i] = data_pos_rot[i].rot_whl[j];
       }
     }
 
@@ -201,8 +211,8 @@ function render() {
 
         // update wheel-knuckle(i) position and orientation
         for (var i = 0; i < num_wheels; i++){
-          wheels[i].setRotationFromMatrix(wheels_rot[i]);
-          wheels[i].position.set(wheels_pos[i].x, wheels_pos[i].y, wheels_pos[i].z);
+          wheels[i].setRotationFromMatrix( wheels_rot[i] );
+          wheels[i].position.set( wheels_pos[i].x, wheels_pos[i].y, wheels_pos[i].z );
         }
 
         // update chassis position and orientation
@@ -212,11 +222,8 @@ function render() {
         }
 
         // update camera position
-        // camera.position.x = cp.x - 10.0*Math.sin(yaw_angle);
-        // camera.position.y = cp.y - 10.0*Math.cos(yaw_angle);
-        // console.log(cp.x);
-        camera.position.x = cp.x - 10.0;
-        camera.position.y = cp.y - 10.0;
+        camera.position.x = chassis_pos[0].x - 10.0;
+        camera.position.y = chassis_pos[0].y - 10.0;
         camera.lookAt(chassis[0].position);
 
         // update time simulation on canvas
@@ -258,8 +265,12 @@ var main = function( ) {
 
     var loader = new THREE.FileLoader();
 
+    var index = 0;
+
     function loadNextSimulation() {
       if (index > files.length - 1) return;
+
+      console.log(files[index]);
 
       loader.load(files[index], function (data) {
         result[index] = data.split('\n').map( readLine );
