@@ -203,10 +203,8 @@ function computePosRot( result ) {
   ac = A0F;
 
   return {
-    pos_w1: w1p, rot_w1: aw1,
-    pos_w2: w2p, rot_w2: aw2,
-    pos_w3: w3p, rot_w3: aw3,
-    pos_w4: w4p, rot_w4: aw4,
+    pos_whl: [w1p, w2p, w3p, w4p],
+    rot_whl: [aw1, aw2, aw3, aw4],
     pos_ch: cp, rot_ch: ac
   };
 }

@@ -167,33 +167,48 @@ function init( ) {
 // define render function
 function render() {
 
-    // var chassis = scene.getObjectByName('chassis');
-
     if ( initAnim ) { idx = 0; }
 
-    // update position and orientation of each body
-    var data_pos_rot = computePosRot( result[0] );
+    // get position and orientation of each body
+    var data_pos_rot = [];
+    for (var i = 0; i < num_simu; i++){
+      data_pos_rot[i] = computePosRot( result[i] );
+    }
 
-    // wheels
-    var wheels_pos = [data_pos_rot.pos_w1, data_pos_rot.pos_w2, data_pos_rot.pos_w3, data_pos_rot.pos_w4];
-    var wheels_rot = [data_pos_rot.rot_w1, data_pos_rot.rot_w2, data_pos_rot.rot_w3, data_pos_rot.rot_w4];
+    // wheels position and orientation
+    var wheels_pos = [];
+    var wheels_rot = [];
+
+    num_wheels = wheels.length;
+    for (var i = 0; i < num_simu; i++){
+      for (var j = 0; j < num_wheels; j++){
+        wheels_pos[j + num_wheels*i] = data_pos_rot[i].pos_whl[j];
+        wheels_rot[j + num_wheels*i] = data_pos_rot[i].rot_whl[j];
+      }
+    }
 
     // chassis
-    var cp = data_pos_rot.pos_ch;
-    var ac = data_pos_rot.rot_ch;
+    var chassis_pos = [];
+    var chassis_rot = [];
+
+    num_chassis = chassis.length;
+    for (var i = 0; i < num_chassis; i++){
+      chassis_pos[i] = data_pos_rot[i].pos_ch;
+      chassis_rot[i] = data_pos_rot[i].rot_ch;
+    }
 
     if ( scene !== undefined ) {
 
         // update wheel-knuckle(i) position and orientation
-        for (var i = 0; i < wheels.length; i++){
+        for (var i = 0; i < num_wheels; i++){
           wheels[i].setRotationFromMatrix(wheels_rot[i]);
           wheels[i].position.set(wheels_pos[i].x, wheels_pos[i].y, wheels_pos[i].z);
         }
 
         // update chassis position and orientation
-        for (var i = 0; i < chassis.length; i++){
-          chassis[i].setRotationFromMatrix( ac );
-          chassis[i].position.set( cp.x, cp.y, cp.z );
+        for (var i = 0; i < num_chassis; i++){
+          chassis[i].setRotationFromMatrix( chassis_rot[i] );
+          chassis[i].position.set( chassis_pos[i].x, chassis_pos[i].y, chassis_pos[i].z );
         }
 
         // update camera position
