@@ -6,8 +6,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container, scene, camera, renderer, FPS;
 
 // Simulation informations
-var files = ['bodies_motion.txt', 'bodies_motion1.txt'];
-// var files = ['bodies_motion.txt'];
+var files = ['bodies_motion_off.txt', 'bodies_motion_on.txt'];
 var num_simu = files.length;
 
 // Create dynamically objects 3D for wheels and chassis
@@ -26,9 +25,6 @@ for (var i = 0; i < num_simu*num_wheels_per_car; i++){
   wheels[i] = new THREE.Object3D();
 }
 
-console.log(wheels);
-console.log(chassis);
-
 // result data from ASCII file
 var result = [];
 
@@ -43,7 +39,6 @@ var time_sim;
 var yaw_angle = 0;
 
 var kdelta_t;
-
 
 // --------------------------------------------------------------------------//
 // RESIZE WINDOWS FUNCTION
@@ -130,12 +125,18 @@ function init( ) {
 
     num_chassis = chassis.length;
     for (var i = 0; i < num_chassis; i++){
-      chassis[i] = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial( { color: 0xff8010, wireframe: true } ));
-      chassis[i] = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+      var material;
+      if (i == 0){
+        material = new THREE.MeshBasicMaterial( { color: 0x7f7f7f, transparent: true, opacity: 0.4} );
+      }
+      else{
+        material = new THREE.MultiMaterial( materials );
+      }
+      chassis[i] = new THREE.Mesh(geometry, material);
       chassis[i].scale.x = chassis[i].scale.z = scale_factor;
       chassis[i].add(createAxis());
       chassis[i].rotation.order = 'ZYX';
-
+      chassis[i].position.set( 0, 0, wheel_radius );
       scene.add( chassis[i] );
     }
   });
@@ -222,9 +223,9 @@ function render() {
         }
 
         // update camera position
-        camera.position.x = chassis_pos[0].x - 10.0;
-        camera.position.y = chassis_pos[0].y - 10.0;
-        camera.lookAt(chassis[0].position);
+        camera.position.x = chassis_pos[1].x - 10.0;
+        camera.position.y = chassis_pos[1].y - 10.0;
+        camera.lookAt(chassis[1].position);
 
         // update time simulation on canvas
         valueNode.nodeValue = 't[s] = ' + time_sim.toFixed(1);
